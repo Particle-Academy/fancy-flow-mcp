@@ -1,0 +1,66 @@
+{
+    "name": "particle-academy/fancy-flow-mcp",
+    "description": "A Laravel MCP server that lets an AI agent build fancy-flow workflows headlessly — list node kinds, add/connect/configure nodes, validate, export the WorkflowSchema, and run — as a thin, deterministic wrapper over particle-academy/fancy-flow-php.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "mcp",
+        "model-context-protocol",
+        "workflow",
+        "flow",
+        "fancy-flow",
+        "laravel",
+        "agentic",
+        "ai",
+        "particle-academy"
+    ],
+    "homepage": "https://github.com/Particle-Academy/fancy-flow-mcp",
+    "support": {
+        "issues": "https://github.com/Particle-Academy/fancy-flow-mcp/issues",
+        "source": "https://github.com/Particle-Academy/fancy-flow-mcp"
+    },
+    "authors": [
+        {
+            "name": "Particle Academy",
+            "homepage": "https://github.com/Particle-Academy"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "ext-json": "*",
+        "laravel/mcp": "^0.9",
+        "particle-academy/fancy-flow-php": "^0.8"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0|^11.0",
+        "pestphp/pest": "^3.0|^4.0",
+        "phpunit/phpunit": "^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FancyFlow\\Mcp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FancyFlow\\Mcp\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "pest"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FancyFlow\\Mcp\\FancyFlowMcpServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
