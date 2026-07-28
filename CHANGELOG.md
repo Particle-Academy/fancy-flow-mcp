@@ -12,6 +12,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-07-28
+
+### Changed
+
+- Widened the `particle-academy/fancy-flow-php` requirement from `^0.8` to `>=0.8 <2.0`, so a sibling
+  minor release is an upgrade and not a resolver conflict. **No action needed** —
+  widening a range only adds candidates; the version you have today still resolves.
+
+  A caret on a `0.x` range locks the MINOR, so every one of these pinned a
+  sibling at whatever it happened to be on the day it was written, and each
+  sibling release then read as a conflict to Composer/npm rather than an
+  upgrade. Nothing in this package was using an API the newer minors removed
+  — the range was the whole problem.
+
+  This one was **already blocking**: the sibling had shipped past the cap,
+  so installing the two together resolved to an old copy or refused
+  outright. Nothing reported it, because a resolver quietly picking an older
+  version looks exactly like success.
+
 ### Added
 
 - Initial cut: a [`laravel/mcp`](https://github.com/laravel/mcp) server that lets
