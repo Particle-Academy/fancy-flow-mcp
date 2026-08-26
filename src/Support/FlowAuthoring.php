@@ -46,9 +46,42 @@ final class FlowAuthoring
      */
     public static function default(): self
     {
+        return self::withHostKinds(null);
+    }
+
+    /**
+     * The authorable catalogue, INCLUDING the host application's own kinds.
+     *
+     * This is the difference between an MCP that can author the host's real
+     * workflows and one that can only author ours. A host registering
+     * `deal_list`, `document` or any org-scoped kind gets them in
+     * `list_node_kinds` and `describe_node_kind`, and `connect_nodes` can then
+     * validate their ports — which is the whole point, because an edge naming a
+     * source port nothing publishes does not fail, does not warn, and delivers
+     * NOTHING. `collectInputs` binds only when `"<sourceId>:<handle>"` exists.
+     *
+     * That failure is worse than a missing field: the downstream template is
+     * completely correct and renders empty, because the payload never arrived to
+     * have a field in it. Reported by a consumer who misdiagnosed two issues off
+     * the back of it. An authoring API that knows the ports removes the string
+     * an author can get wrong.
+     *
+     * **Still its own instance.** Host kinds are COPIED in rather than the host
+     * registry being used directly, so concurrent servers cannot clobber each
+     * other's catalogue — the reason the isolated registry existed in the first
+     * place. Host kinds are registered LAST and therefore win: a host overriding
+     * a builtin means it, and an authoring surface that showed the builtin
+     * instead would describe ports the run does not have.
+     */
+    public static function withHostKinds(?NodeKindRegistry $host): self
+    {
         $registry = new NodeKindRegistry();
         Builtin::register($registry, withStructural: true);
         $registry->register(NodeKind::fromArray(Builtin::agentKind()));
+
+        foreach ($host?->all() ?? [] as $kind) {
+            $registry->register($kind);
+        }
 
         return new self($registry);
     }
@@ -401,19 +434,61 @@ final class FlowAuthoring
     }
 
     /**
-     * Full manifest for `describe_node_kind`, including the effective default
-     * config a fresh node of this kind would carry.
+     * Full manifest for `describe_node_kind`, including the effective config a
+     * node of this kind would carry and — the part an author actually needs —
+     * the FIELDS it emits, resolved.
      *
+     * @param  array<string,mixed>|null $config the node's own config, when
+     *                                          describing a node that exists;
+     *                                          null uses the kind's defaults
      * @return array<string,mixed>
      */
-    public function describeKind(NodeKind $kind): array
+    public function describeKind(NodeKind $kind, ?array $config = null): array
     {
         $manifest = $kind->toArray();
+        $effective = $config ?? $this->kinds->defaultConfigFor($kind);
         $manifest['defaultConfig'] = $this->kinds->defaultConfigFor($kind);
         $manifest['ports'] = [
-            'inputs' => PortResolver::inputs($kind, $manifest['defaultConfig']),
-            'outputs' => PortResolver::outputs($kind, $manifest['defaultConfig']),
+            'inputs' => PortResolver::inputs($kind, $effective),
+            'outputs' => PortResolver::outputs($kind, $effective),
         ];
+
+        // RESOLVED, not the serialisation marker.
+        //
+        // `toArray()` writes `"dynamic"` for a config-dependent shape, because a
+        // Closure cannot cross a JSON manifest. Handing that to an authoring
+        // agent is useless in the one place it matters most: `llm_call` is the
+        // most-referenced kind there is, and "dynamic" tells an author nothing
+        // about whether `{{ in.text }}` will resolve.
+        //
+        // Here there is a live registry and a config, so the question CAN be
+        // answered. `configDependent` stays on the reply so the agent knows the
+        // answer moves when it configures the node -- an `llm_call` gains `data`
+        // the moment a `response_schema` is set, and an author who cached the
+        // first answer would be wrong about the second.
+        $manifest['emits'] = [
+            'fields' => $kind->outputShapeFor($effective),
+            'relation' => $kind->emitsFor($effective),
+            'expressionConfigKey' => $kind->expressionConfigKey($effective),
+            'configDependent' => $kind->hasDynamicOutputShape() || $kind->emits instanceof \Closure,
+        ];
+
+        // `fields: null` and `fields: []` are DIFFERENT answers and an agent
+        // must not read them alike. Spelled out, because a reply full of nulls
+        // invites exactly the reassuring misreading.
+        $manifest['emits']['note'] = match (true) {
+            $manifest['emits']['fields'] === null && $manifest['emits']['relation'] === 'input'
+                => 'Emits its input unchanged, so the fields available here are whatever the UPSTREAM node emits. Describe that node to learn them.',
+            $manifest['emits']['fields'] === null && $manifest['emits']['relation'] === 'inputs-merged'
+                => 'Emits the union of every input PAYLOAD\'s fields. Describe the upstream nodes to learn them.',
+            $manifest['emits']['fields'] === null && $manifest['emits']['relation'] === 'input-map-merged'
+                => 'Merges the raw input MAP, whose shape depends on position: at an entry point the payload\'s fields are top level, but with an inbound edge they sit under the port name.',
+            $manifest['emits']['fields'] === null
+                => 'NOT DECLARED — nobody has stated what this kind emits. Unknown, NOT "emits nothing": do not refuse a reference on this basis.',
+            $manifest['emits']['fields'] === []
+                => 'Declares that it emits no addressable fields.',
+            default => null,
+        };
 
         return $manifest;
     }

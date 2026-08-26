@@ -10,6 +10,72 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## 0.3.0 — 2026-08-26
+
+### Added
+
+- **The authoring catalogue now includes the HOST application's own node
+  kinds.** `list_node_kinds`, `describe_node_kind` and — the one that matters —
+  `connect_nodes` all see them.
+
+  This is the difference between an MCP that can author your real workflows and
+  one that can only author ours. A host whose graphs are built from `deal_list`,
+  `document`, `response` or any org-scoped kind previously got a server that
+  could not name them, let alone connect them.
+
+  **Why `connect_nodes` is the point.** An edge naming a source port nothing
+  publishes does not fail and does not warn — `collectInputs` binds a payload
+  only when `"<sourceId>:<handle>"` exists, so the edge silently delivers
+  NOTHING and the downstream template renders empty while being completely
+  correct. Authoring through an API that knows the ports removes the string
+  there is to get wrong — but only for kinds the API can see. The consumer who
+  asked for this had misdiagnosed two filed issues off the back of that exact
+  failure.
+
+  **How to use it:** in a Laravel app, nothing. The service provider resolves
+  the container's `NodeKindRegistry` — the same one `FlowRunner` uses — so kinds
+  you register are picked up automatically. It is resolved lazily inside the
+  binding, because a host registers its kinds in its own provider's `boot()`,
+  which may run after ours. Outside Laravel, call
+  `FlowAuthoring::withHostKinds($yourRegistry)`.
+
+  Host kinds are **copied in**, not read by reference, so concurrent servers
+  cannot clobber each other's catalogue. They are registered LAST and therefore
+  win over a builtin of the same name: a host overriding a builtin means it, and
+  showing the builtin instead would describe ports the run does not have.
+
+  Requested by MOIC.
+
+### Changed
+
+- **`describe_node_kind` now RESOLVES what a kind emits instead of returning the
+  serialisation marker.** `toArray()` writes `"dynamic"` for a config-dependent
+  shape, because a Closure cannot cross a JSON manifest — and handing that to an
+  authoring agent is useless in the place it matters most, since `llm_call` is
+  the most-referenced kind there is and "dynamic" says nothing about whether
+  `{{ in.text }}` will resolve.
+
+  Here there is a live registry and a config, so the question can be answered.
+  The reply carries `emits.fields`, `emits.relation`, `emits.expressionConfigKey`
+  and `emits.configDependent` — the last so an agent knows the answer MOVES when
+  it configures the node (an `llm_call` gains `data` the moment a
+  `response_schema` is set, and an author who cached the first answer would be
+  wrong about the second).
+
+  `emits.note` spells out the difference between `fields: null` and `fields: []`,
+  because a reply full of nulls invites exactly the reassuring misreading:
+  **not-declared is UNKNOWN, not "emits nothing"**, and an agent must not refuse
+  a reference on that basis.
+
+  `describeKind()` takes an optional `$config`, so an existing node is described
+  with its OWN configuration rather than the kind's defaults.
+
+- Requires `particle-academy/fancy-flow-php >= 0.43`, and is tested against it.
+  That release fixes the engine half of the same bug: host-registered kinds'
+  output ports were invisible to `FlowRunner` too, so authoring a correct edge
+  was necessary but not sufficient. **Take both or neither** — this package
+  alone will happily author an edge the engine then refuses to route.
+
 ## [Unreleased]
 
 ## [0.2.0] — 2026-08-07

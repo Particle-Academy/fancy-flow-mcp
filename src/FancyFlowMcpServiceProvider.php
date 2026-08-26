@@ -9,6 +9,7 @@ use FancyFlow\Mcp\Store\ArrayDraftStore;
 use FancyFlow\Mcp\Store\CacheDraftStore;
 use FancyFlow\Mcp\Store\DraftStore;
 use FancyFlow\Mcp\Support\FlowAuthoring;
+use FancyFlow\NodeKindRegistry;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Mcp\Facades\Mcp;
@@ -29,7 +30,22 @@ final class FancyFlowMcpServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(self::CONFIG, 'fancy-flow-mcp');
 
-        $this->app->singleton(FlowAuthoring::class, static fn (): FlowAuthoring => FlowAuthoring::default());
+        // Prefer the HOST's registry when the app has bound one. `fancy-flow-php`'s
+        // own service provider binds `NodeKindRegistry`, and a host registering
+        // custom kinds registers them there -- the same registry `FlowRunner`
+        // resolves. Reading it here is what lets an agent author the host's real
+        // workflows rather than only ours.
+        //
+        // Resolved lazily inside the closure, not at register() time: a host
+        // registers its kinds in its own provider's boot(), which may run after
+        // this one.
+        $this->app->singleton(FlowAuthoring::class, static function ($app): FlowAuthoring {
+            $host = $app->bound(NodeKindRegistry::class)
+                ? $app->make(NodeKindRegistry::class)
+                : null;
+
+            return FlowAuthoring::withHostKinds($host);
+        });
 
         $this->app->singleton(DraftStore::class, function (Application $app): DraftStore {
             $config = (array) $app['config']->get('fancy-flow-mcp.store', []);
