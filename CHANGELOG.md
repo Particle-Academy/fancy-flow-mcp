@@ -10,6 +10,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## 0.3.1 — 2026-08-26
+
+### Fixed
+
+- **`describe_node_kind` and the ENGINE disagreed about a config-derived node's
+  ports**, and the engine was the one that got it wrong — so an agent that
+  followed this server's advice had its graph flagged.
+
+  This package derived a `switch_case`'s ports from its `cases` map (correctly
+  offering a third case once three were configured), while the engine's
+  undelivered-edge warning read only the kind's static declaration and reported
+  that port as impossible. **The authoring API invited the edge and the runtime
+  called it a mistake.**
+
+  The derivation now lives once, in `fancy-flow-php`'s
+  `Registry\PortResolution`, and this package calls it. Requires
+  `fancy-flow-php >= 0.46`.
+
+  What deliberately did NOT move: a TERMINAL kind declares an empty port list
+  and nothing may connect from it — an authoring rule, kept here, because the
+  engine legitimately answers differently (`activatedPorts` publishes `out` for
+  such a node, a historical fallback so a chain through one is not silently
+  cut). Two different questions; only the duplicated one was unified.
+
+  Found by **flabs**, where an agent configured a third case through this server
+  and the engine then failed the graph.
+
 ## 0.3.0 — 2026-08-26
 
 ### Added

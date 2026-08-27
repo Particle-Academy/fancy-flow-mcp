@@ -6,6 +6,7 @@ namespace FancyFlow\Mcp\Support;
 
 use FancyFlow\Registry\KindId;
 use FancyFlow\Registry\NodeKind;
+use FancyFlow\Registry\PortResolution;
 use FancyFlow\Schema\PortDescriptor;
 
 /**
@@ -31,20 +32,39 @@ final class PortResolver
      * @param array<string,mixed> $config
      * @return list<string>
      */
+    /**
+     * Every port a node of this kind could publish, given its config.
+     *
+     * DELEGATED to `FancyFlow\Registry\PortResolution` in the engine. This file
+     * used to derive it here while the engine derived it from the kind's static
+     * declaration -- so `describe_node_kind` correctly offered a third
+     * `switch_case` port once three cases were configured, and the engine's
+     * undelivered-edge warning reported that same port as impossible.
+     *
+     * The authoring API invited an edge and the runtime called it a mistake. Two
+     * copies of one rule agree right up until someone edits one of them, and
+     * nothing anywhere reports the divergence -- so there is one copy now, and it
+     * lives with the runtime that has to honour it.
+     *
+     * @param  array<string,mixed> $config
+     * @return list<string>
+     */
     public static function outputs(?NodeKind $kind, array $config): array
     {
-        if ($kind === null) {
-            return ['out'];
+        // A TERMINAL kind declares an EMPTY port list, and nothing may connect
+        // FROM it. That is an AUTHORING rule and it stays here, because the
+        // engine legitimately answers differently: `activatedPorts` publishes
+        // `out` for such a node, a historical fallback kept so that a chain
+        // through one is not silently cut.
+        //
+        // Two different questions -- "what may I connect from?" and "what does
+        // it publish at run time?" -- so unifying them was wrong. Only the
+        // CONFIG-DERIVED derivation was duplicated, and only that is delegated.
+        if ($kind !== null && $kind->outputs === []) {
+            return [];
         }
 
-        $base = self::declared($kind->outputs, 'out');
-
-        return match (KindId::bare($kind->name)) {
-            'llm_router' => self::llmRouterPorts($config, $base),
-            'switch_case' => self::switchCasePorts($config, $base),
-            'subflow' => self::subflowPorts($config, $base),
-            default => $base,
-        };
+        return PortResolution::possible(null, $kind, $config);
     }
 
     /**
@@ -73,67 +93,6 @@ final class PortResolver
         return array_values(array_map(static fn (PortDescriptor $p): string => $p->id, $ports));
     }
 
-    /**
-     * @param array<string,mixed> $config
-     * @param list<string>        $base
-     * @return list<string>
-     */
-    private static function llmRouterPorts(array $config, array $base): array
-    {
-        $routes = $config['routes'] ?? null;
-        if (! is_array($routes) || $routes === []) {
-            return $base;
-        }
 
-        $ports = [];
-        foreach ($routes as $route) {
-            if (is_array($route) && isset($route['port']) && $route['port'] !== '') {
-                $ports[] = (string) $route['port'];
-            }
-        }
-        // The `fallback` port defaults ON (kind config switch default true).
-        if (($config['fallback'] ?? true) !== false) {
-            $ports[] = 'fallback';
-        }
 
-        return $ports === [] ? $base : array_values(array_unique($ports));
-    }
-
-    /**
-     * @param array<string,mixed> $config
-     * @param list<string>        $base
-     * @return list<string>
-     */
-    private static function switchCasePorts(array $config, array $base): array
-    {
-        $cases = $config['cases'] ?? null;
-        if (! is_array($cases) || $cases === []) {
-            return $base;
-        }
-
-        $ports = [];
-        foreach ($cases as $port) {
-            if (is_string($port) && $port !== '') {
-                $ports[] = $port;
-            }
-        }
-        $ports[] = 'default';
-
-        return array_values(array_unique($ports));
-    }
-
-    /**
-     * @param array<string,mixed> $config
-     * @param list<string>        $base
-     * @return list<string>
-     */
-    private static function subflowPorts(array $config, array $base): array
-    {
-        $mode = (string) ($config['mode'] ?? 'output');
-        if ($mode === 'stream' || $mode === 'both') {
-            $base[] = 'stream';
-        }
-
-        return array_values(array_unique($base));
-    }
 }
