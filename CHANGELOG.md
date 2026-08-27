@@ -10,6 +10,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## 0.4.0 — 2026-08-26
+
+### Changed
+
+- **Floor raised to `fancy-flow-php` >=0.48**, which refuses a graph containing
+  a node that cannot take part in it. Two shapes an agent authoring iteratively
+  produces, both of which used to validate clean and then run doing nothing:
+
+  - a **floating node** — no inbound and no outbound edge. It is not skipped; a
+    node with no incoming edge is a root, so the engine runs it, disconnected.
+  - an **edge whose source is a terminal node** (`output`, `log`). The
+    downstream node still runs, with its input resolving to `""`.
+
+  `note` may float, so an agent can annotate what it built.
+
+  **The likeliest way to hit this is `remove_node`**, which cascades a node's
+  edges — deleting one from the middle of a chain strands both its neighbours.
+  That case now fails `validate_workflow` instead of passing it.
+
+### Added
+
+- Tests asserting the refusal REACHES AN AGENT, through `validate_workflow` and
+  `run_workflow` rather than only through the engine's own importer. A separate
+  claim from "the engine produces the error", and the one worth pinning here.
+
+  These also record where the terminator edge is actually caught: **`connect_nodes`
+  already refuses to create it** (a terminal kind publishes no source port), so
+  validation is the second line, for a graph that arrived as JSON rather than
+  through the tools.
+
+### What a consumer must do
+
+Nothing, unless a graph you author already contains a stray node — in which case
+`validate_workflow` now tells you which one, by id, and `run_workflow` declines
+until it is wired or deleted. Mid-build drafts are unaffected: `validate` runs
+only when you call it, never after each `add_node`.
+
+---
+
 ## 0.3.1 — 2026-08-26
 
 ### Fixed

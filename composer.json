@@ -29,7 +29,7 @@
         "php": "^8.4",
         "ext-json": "*",
         "laravel/mcp": "^0.9",
-        "particle-academy/fancy-flow-php": ">=0.46 <2.0"
+        "particle-academy/fancy-flow-php": ">=0.48 <2.0"
     },
     "require-dev": {
         "orchestra/testbench": "^10.0|^11.0",
