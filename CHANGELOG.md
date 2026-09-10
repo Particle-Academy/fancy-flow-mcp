@@ -144,6 +144,11 @@ only when you call it, never after each `add_node`.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The MCP server advertised 0.1.0 while the package shipped as 0.4.0.** `#[Version]` goes out in the `serverInfo` of every `initialize` response, so every agent that completed a handshake was told a version three minor releases stale. A PHP attribute argument must be a constant expression, so it now names a class constant that `VersionIsSingleSourcedTest` pins to the newest changelog entry — and a second assertion checks the attribute actually uses it, since a correct constant with a stale attribute would still lie.
+
+
 ## [0.2.0] — 2026-08-07
 
 ### Changed

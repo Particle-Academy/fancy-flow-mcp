@@ -36,7 +36,7 @@ use Laravel\Mcp\Server\Attributes\Version;
  * LLM calls of its own.
  */
 #[Name('Fancy Flow Builder')]
-#[Version('0.1.0')]
+#[Version(self::VERSION)]
 #[Instructions(<<<'TXT'
 This server lets you build fancy-flow workflows headlessly, as portable
 WorkflowSchema v1 documents.
@@ -59,6 +59,20 @@ Pass the workflow_id returned by create_workflow to every subsequent call.
 TXT)]
 final class FlowBuilderServer extends Server
 {
+    /**
+     * The version this server ADVERTISES to every client that connects.
+     *
+     * It was the literal '0.1.0' while the package shipped as 0.4.0 — three
+     * minor releases stale — so every agent that completed a handshake was told
+     * a version that had not existed for months. Nothing reported it, because
+     * nothing compared it to the changelog.
+     *
+     * `VersionIsSingleSourcedTest` does that now. It is a constant rather than a
+     * dynamic read because a PHP attribute argument must be a constant
+     * expression, so this is the closest thing to one source available here.
+     */
+    public const VERSION = '0.4.0';
+
     /** @var array<int, class-string<\Laravel\Mcp\Server\Tool>> */
     protected array $tools = [
         // discover
