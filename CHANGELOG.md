@@ -10,6 +10,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- **The tag workflow is now `.github/workflows/publish.yml`, named `Publish`**
+  (it was `release-gate.yml`, "Release gate"). Every Particle-Academy package
+  publishes from that file under that name. What it does is unchanged: on a
+  `v*` tag it checks that `CHANGELOG.md` has an entry for the version and that
+  the entry is the newest one. Packagist syncs from the tag and never reads the
+  workflow file, so nothing about how a release reaches Composer changes.
+
+  **What you must do:** nothing. Only a script that looks runs up by the old
+  file (`gh run list --workflow=release-gate.yml`) needs `publish.yml` instead.
+
+### Fixed
+
+- **The MCP server advertised 0.1.0 while the package shipped as 0.4.0.** `#[Version]` goes out in the `serverInfo` of every `initialize` response, so every agent that completed a handshake was told a version three minor releases stale. A PHP attribute argument must be a constant expression, so it now names a class constant that `VersionIsSingleSourcedTest` pins to the newest changelog entry — and a second assertion checks the attribute actually uses it, since a correct constant with a stale attribute would still lie.
+
 ## 0.4.0 — 2026-08-26
 
 ### Changed
@@ -141,13 +159,6 @@ only when you call it, never after each `add_node`.
   output ports were invisible to `FlowRunner` too, so authoring a correct edge
   was necessary but not sufficient. **Take both or neither** — this package
   alone will happily author an edge the engine then refuses to route.
-
-## [Unreleased]
-
-### Fixed
-
-- **The MCP server advertised 0.1.0 while the package shipped as 0.4.0.** `#[Version]` goes out in the `serverInfo` of every `initialize` response, so every agent that completed a handshake was told a version three minor releases stale. A PHP attribute argument must be a constant expression, so it now names a class constant that `VersionIsSingleSourcedTest` pins to the newest changelog entry — and a second assertion checks the attribute actually uses it, since a correct constant with a stale attribute would still lie.
-
 
 ## [0.2.0] — 2026-08-07
 
