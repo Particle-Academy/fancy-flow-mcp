@@ -1,5 +1,7 @@
 # fancy-flow-mcp
 
+[![Fancified](art/fancified.svg)](https://particle.academy)
+
 **A Laravel MCP server that lets an AI agent build [fancy-flow](https://github.com/Particle-Academy/fancy-flow) workflows headlessly.**
 
 Built on [`laravel/mcp`](https://github.com/laravel/mcp) (Laravel's official MCP
@@ -20,7 +22,7 @@ network, no guessing.
 composer require particle-academy/fancy-flow-mcp
 ```
 
-Requires PHP 8.3+ (fancy-flow-php's floor) and Laravel 12 or 13
+Requires PHP 8.4+ (fancy-flow-php's floor) and Laravel 12 or 13
 (`laravel/mcp` needs `illuminate/json-schema`, which ships in framework 12+).
 
 ---
@@ -124,13 +126,6 @@ vendor/bin/pest
 
 The suite has framework-free unit tests (the authoring core + port resolver) and
 feature tests that drive the real MCP tools through `FlowBuilderServer`.
-
-## Local development note
-
-`particle-academy/fancy-flow-php` is not yet published to Packagist. Until it is,
-`composer.json` carries a local `path` repository pointing at `../fancy-flow-php`
-(its sibling in the Fancy suite envelope). When fancy-flow-php ships, drop that
-`repositories` block and the dependency resolves from Packagist as `^0.x`.
 
 ## License
 
