@@ -15,7 +15,11 @@ jobs:
       fail-fast: false
       matrix:
         php: ["8.4"]
-    name: PHP ${{ matrix.php }}
+        # composer.json admits BOTH laravel/mcp lines (^0.9|^1.0). A plain
+        # `composer update` only ever resolves the newest, so without this
+        # axis the 0.9 half of the range is a claim nothing tests.
+        mcp: ["0.9.*", "1.*"]
+    name: PHP ${{ matrix.php }} / laravel/mcp ${{ matrix.mcp }}
 
     steps:
       - uses: actions/checkout@v7
@@ -49,7 +53,7 @@ jobs:
           extensions: mbstring, json
 
       - name: Install dependencies
-        run: composer update --prefer-dist --no-interaction --no-progress
+        run: composer update --prefer-dist --no-interaction --no-progress --with "laravel/mcp:${{ matrix.mcp }}"
 
       - name: Run tests
         run: vendor/bin/pest --colors=always

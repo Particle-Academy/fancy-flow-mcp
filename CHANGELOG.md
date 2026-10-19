@@ -12,7 +12,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## 0.5.0 — 2026-10-19
+
+### Added
+
+- **`laravel/mcp` 1.0 is supported.** The requirement is now
+  `laravel/mcp: ^0.9|^1.0` (was `^0.9`), so a host can take laravel/mcp 1.x
+  alongside this package. Fixes #1.
+
+  **What you must do:** nothing to keep working — 0.9 is still in the range and
+  this is a widen, so the version you already have still resolves. To move to
+  laravel/mcp 1.x, require `laravel/mcp: ^1.0` in your app and run
+  `composer update laravel/mcp -W`. This package needed no code changes for 1.0:
+  it only defines `Server`, `Tool` and `Resource` classes, which laravel/mcp's
+  upgrade guide lists as unaffected. What 1.0 changes is on YOUR side of the
+  wire: `Mcp::web(...)` routes now require the `MCP-Protocol-Version` /
+  `Mcp-Method` / `Mcp-Name` headers from 2026-07-28 clients (legacy `initialize`
+  clients are exempt), and `Request::sessionId()` is gone. Read laravel/mcp's
+  `UPGRADE.md` if your app tests its MCP endpoint over HTTP.
+
 ### Changed
+
+- **CI tests both `laravel/mcp` lines.** The test matrix gained a
+  `laravel/mcp` axis (`0.9.*` and `1.*`), because a plain `composer update`
+  only resolves the newest and would leave the 0.9 half of the range untested.
+  Verified locally before release: 48 passed on 1.0.2 and on 0.9.6.
 
 - **The tag workflow is now `.github/workflows/publish.yml`, named `Publish`**
   (it was `release-gate.yml`, "Release gate"). Every Particle-Academy package

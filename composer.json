@@ -28,7 +28,7 @@
     "require": {
         "php": "^8.4",
         "ext-json": "*",
-        "laravel/mcp": "^0.9",
+        "laravel/mcp": "^0.9|^1.0",
         "particle-academy/fancy-flow-php": ">=0.48 <2.0"
     },
     "require-dev": {

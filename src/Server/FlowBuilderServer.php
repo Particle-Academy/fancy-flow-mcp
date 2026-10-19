@@ -71,7 +71,7 @@ final class FlowBuilderServer extends Server
      * dynamic read because a PHP attribute argument must be a constant
      * expression, so this is the closest thing to one source available here.
      */
-    public const VERSION = '0.4.0';
+    public const VERSION = '0.5.0';
 
     /** @var array<int, class-string<\Laravel\Mcp\Server\Tool>> */
     protected array $tools = [
