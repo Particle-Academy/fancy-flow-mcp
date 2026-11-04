@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FancyFlow\Mcp\Store;
 
-use FancyFlow\Mcp\Support\DraftWorkflow;
+use FancyFlow\Authoring\DraftWorkflow;
 use Illuminate\Contracts\Cache\Repository as Cache;
 
 /**

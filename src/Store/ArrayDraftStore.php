@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FancyFlow\Mcp\Store;
 
-use FancyFlow\Mcp\Support\DraftWorkflow;
+use FancyFlow\Authoring\DraftWorkflow;
 
 /**
  * In-process draft store — one PHP process's memory. Perfect for a long-lived

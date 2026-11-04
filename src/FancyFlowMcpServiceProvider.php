@@ -8,7 +8,7 @@ use FancyFlow\Mcp\Server\FlowBuilderServer;
 use FancyFlow\Mcp\Store\ArrayDraftStore;
 use FancyFlow\Mcp\Store\CacheDraftStore;
 use FancyFlow\Mcp\Store\DraftStore;
-use FancyFlow\Mcp\Support\FlowAuthoring;
+use FancyFlow\Authoring\FlowAuthoring;
 use FancyFlow\NodeKindRegistry;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -46,6 +46,10 @@ final class FancyFlowMcpServiceProvider extends ServiceProvider
 
             return FlowAuthoring::withHostKinds($host);
         });
+
+        // The class moved to fancy-flow-php. A binding is keyed by the string, so
+        // the old name needs its own alias or it resolves a fresh instance.
+        $this->app->alias(FlowAuthoring::class, 'FancyFlow\Mcp\Support\FlowAuthoring');
 
         $this->app->singleton(DraftStore::class, function (Application $app): DraftStore {
             $config = (array) $app['config']->get('fancy-flow-mcp.store', []);

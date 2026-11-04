@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FancyFlow\Mcp\Store;
 
-use FancyFlow\Mcp\Support\DraftWorkflow;
+use FancyFlow\Authoring\DraftWorkflow;
 
 /**
  * Where in-progress workflows live between MCP tool calls. An agent authors a

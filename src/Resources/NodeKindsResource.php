@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FancyFlow\Mcp\Resources;
 
-use FancyFlow\Mcp\Support\FlowAuthoring;
+use FancyFlow\Authoring\FlowAuthoring;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;

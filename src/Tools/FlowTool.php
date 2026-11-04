@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace FancyFlow\Mcp\Tools;
 
 use FancyFlow\Mcp\Store\DraftStore;
-use FancyFlow\Mcp\Support\DraftWorkflow;
-use FancyFlow\Mcp\Support\FlowAuthoring;
-use FancyFlow\Mcp\Support\FlowAuthoringException;
+use FancyFlow\Authoring\DraftWorkflow;
+use FancyFlow\Authoring\FlowAuthoring;
+use FancyFlow\Authoring\FlowAuthoringException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;

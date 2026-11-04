@@ -12,6 +12,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The authoring core moved to `fancy-flow-php`**, as `FancyFlow\Authoring\*`
+  (`FlowAuthoring`, `DraftWorkflow`, `PortResolver`, `FlowAuthoringException`), so there
+  is one copy of validation for every surface. This package stays the MCP server on top
+  of it. Requires `fancy-flow-php` `>=0.66`.
+
+  **What a consumer must DO:** nothing. Every tool keeps its name, schema and replies,
+  and the old `FancyFlow\Mcp\Support\*` names are aliases of the same classes, including
+  the container binding. `validate_workflow` now also lists a template naming a field its
+  upstream step does not declare, under `warnings`, because the importer reports it. `ok`
+  does not change.
+
 ## 0.5.0 — 2026-10-19
 
 ### Added
