@@ -27,6 +27,13 @@ Requires PHP 8.4+ (fancy-flow-php's floor) and Laravel 12 or 13
 
 ---
 
+<!-- fancy-agents-note:start -->
+> **For agents.** This package is listed on the Fancy MCP catalog server at
+> `https://ui.particle.academy/mcp` (streamable HTTP, no API key; MCP id `fancy-ui`),
+> with install commands and docs, alongside the rest of the kit. How an agent
+> installs and uses this package is in [AGENTS.md](https://github.com/Particle-Academy/fancy-flow-mcp/blob/main/AGENTS.md).
+<!-- fancy-agents-note:end -->
+
 ## The tools
 
 | Tool | What it does |
@@ -102,30 +109,8 @@ lifecycle of a **web** server; `array` keeps drafts in-process, which is fine fo
 a long-lived **local/stdio** server. Rebind `FancyFlow\Mcp\Store\DraftStore` in
 your app to persist to a database instead.
 
-## A typical build
-
-```
-list_node_kinds
-create_workflow           → { workflow_id: "wf_…" }
-add_node    kind=manual_trigger  node_id=start
-add_node    kind=llm_call        node_id=answer   config={ model, prompt, … }
-add_node    kind=output          node_id=out
-connect_nodes  start  → answer
-connect_nodes  answer → out
-validate_workflow         → { ok: true, … }
-export_workflow           → WorkflowSchema v1 JSON  ← the deliverable
-run_workflow              → deterministic smoke test
-```
-
-## Testing
-
-```bash
-composer install
-vendor/bin/pest
-```
-
-The suite has framework-free unit tests (the authoring core + port resolver) and
-feature tests that drive the real MCP tools through `FlowBuilderServer`.
+A typical tool-by-tool build, for an agent connected to the server, is in
+[AGENTS.md](./AGENTS.md).
 
 ## License
 
