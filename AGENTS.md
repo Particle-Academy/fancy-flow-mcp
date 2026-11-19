@@ -10,7 +10,7 @@ is, is in [README.md](./README.md). Notes for working ON this repo's code are in
 composer require particle-academy/fancy-flow-mcp
 ```
 
-- PHP 8.4+, Laravel 12 or 13. Pulls in `laravel/mcp` and
+- PHP 8.4+, Laravel 13+. Pulls in `laravel/mcp` and
   `particle-academy/fancy-flow-php` (`>=0.66 <2.0`).
 - The service provider auto-registers a **local (stdio)** MCP server named
   `fancy-flow`:

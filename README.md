@@ -22,8 +22,7 @@ network, no guessing.
 composer require particle-academy/fancy-flow-mcp
 ```
 
-Requires PHP 8.4+ (fancy-flow-php's floor) and Laravel 12 or 13
-(`laravel/mcp` needs `illuminate/json-schema`, which ships in framework 12+).
+Requires PHP 8.4+ (fancy-flow-php's floor) and Laravel 13+.
 
 ---
 
