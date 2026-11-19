@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Rebranded the display name to Fancy Dev Kit (README and package description). Package names, the npm scope, URLs and the `fancy-ui` MCP id are unchanged.
 - **Docs:** `AGENTS.md` added: the guide to using this package (install, its entries on the Fancy MCP catalog server, API essentials, traps). `CONTRIBUTING.md` added for the contributor notes, with `CLAUDE.md` as a symlink to it. The README points to the MCP server and to `AGENTS.md`. No code changed; nothing to do.
 - CI: re-pin org third-party allowlist to 2614224
+- Tests moved to Pest 5; `orchestra/testbench` and `phpunit/phpunit` removed from `require-dev`. The Feature suite boots a hand-built Laravel app (`tests/TestCase.php`). `laravel/framework` is now a direct dev dependency, under the integration-framework carve-out (it used to arrive through testbench). No runtime change; nothing to do.
 
 ## [0.6.0] - 2026-11-04
 
