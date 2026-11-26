@@ -12,6 +12,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`add_node` no longer writes `temperature: 0.7` into a new `llm_call` or
+  `agent`.** The server seeds a node from fancy-flow-php's
+  `defaultConfigFor()`, and both kinds declared a 0.7 default there, so every
+  LLM node this server created carried it, the host's client sent it, and
+  current Anthropic models reject a request that sets `temperature`. The
+  default is removed in fancy-flow-php (the release after 0.67.0); this server
+  has none of its own. `add_node`, `export_workflow` and `describe_node_kind`
+  now show no sampling parameter (`temperature`, `top_p`, `top_k`) unless the
+  agent sets one, and an explicit value is carried unchanged. Tests pin it.
+  **What to do:** update `particle-academy/fancy-flow-php` to that release.
+  Nothing else, unless you relied on the implicit 0.7; then pass `temperature`
+  in `config`. Drafts and graphs already saved keep any 0.7 they carry: it
+  cannot be told apart from a deliberate value, so remove it from nodes on a
+  model that rejects it.
+
 ## [0.7.0] - 2026-11-19
 
 ### Changed
